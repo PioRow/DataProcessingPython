@@ -26,9 +26,8 @@ def solution_1(Posts, Users):
     # Puste warotsci przy wczytaniu zamienione na NaN
     Res = (innerQuery[["Location", "Id"]][innerQuery["Location"].notna()]
            .groupby(by="Location",as_index=False).count().rename(
-        columns={"Id": "Count"}).sort_values(by="Count", ascending=False))
+        columns={"Id": "Count"}).sort_values(by="Count", ascending=False,ignore_index=True))
     Res = Res[0:10]
-    Res.index = np.arange(10).tolist()
     return Res
 
 # -----------------------------------------------------------------------------#
@@ -36,9 +35,17 @@ def solution_1(Posts, Users):
 # -----------------------------------------------------------------------------#
 
 def solution_2(Posts, PostLinks):
-    """ Input the solution here """
-    # ...
-    # ...
+
+    #wewnętrzna kwerenda
+    RelatedTab=(PostLinks[["RelatedPostId","Id"]].groupby("RelatedPostId", as_index=False)
+                .count().rename(columns={"RelatedPostId":"PostId","Id":"NumLinks"}))
+
+    # jak poprzednio można użyć metody join
+    Res=RelatedTab.merge(Posts,how="inner",left_on="PostId",right_on="Id")
+
+    Res=(Res[Res.PostTypeId==1][["Title","NumLinks"]].
+         sort_values(by="NumLinks",ascending=False,ignore_index=True))
+    return Res
 
 # -----------------------------------------------------------------------------#
 # Task 3
